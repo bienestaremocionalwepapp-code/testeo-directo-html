@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Formularios — Bienestar Emocional</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Variables ─────────────────────────────────────────── */
+:root{
+  --rp:#FFE5F0;--ri:#FF85C0;--mp:#E8D5FF;--mi:#A67FFF;
+  --card:#fff;--bg:#f5f2ff;--border:#ede8ff;
+  --mid:#5A5570;--text:#2D2A3D;
+  --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── Topbar ─────────────────────────────────────────────── */
+.topbar{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:.8rem 1.4rem;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 12px rgba(166,127,255,.08);
+}
+.tb-l{display:flex;align-items:center;gap:.7rem;}
+.tb-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--ri),var(--mi));display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.tb-brand{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);}
+.tb-brand span{color:var(--mi);}
+
+/* ── Main ────────────────────────────────────────────────── */
+.main{max-width:1100px;margin:0 auto;padding:1.5rem 1.2rem 3rem;}
+
+/* ── Panel de filtros ───────────────────────────────────── */
+.filtros-panel{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:16px;padding:1.2rem 1.4rem;margin-bottom:1.4rem;
+  display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;
+}
+.fg{display:flex;flex-direction:column;gap:.3rem;min-width:160px;}
+.fg label{font-size:.68rem;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.08em;}
+input[type=date],select{
+  padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:10px;
+  font-family:'Manrope',sans-serif;font-size:.88rem;color:var(--text);
+  background:#fafafa;outline:none;transition:all .2s;
+}
+input[type=date]:focus,select:focus{border-color:var(--mi);background:#fff;box-shadow:0 0 0 3px rgba(166,127,255,.1);}
+.filtros-actions{display:flex;gap:.5rem;align-items:flex-end;margin-left:auto;flex-wrap:wrap;}
+
+/* ── Botones ─────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  padding:.65rem 1.2rem;border-radius:50px;font-family:'Manrope',sans-serif;
+  font-size:.84rem;font-weight:700;cursor:pointer;border:none;
+  transition:all .2s;white-space:nowrap;
+}
+.btn-primary{background:linear-gradient(135deg,var(--ri),var(--mi));color:#fff;box-shadow:0 4px 14px rgba(166,127,255,.35);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(166,127,255,.45);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-ghost{background:transparent;color:var(--mid);border:1.5px solid var(--border);}
+.btn-ghost:hover{border-color:var(--mi);color:var(--mi);}
+.btn-pdf{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 4px 14px rgba(239,68,68,.3);}
+.btn-pdf:hover{transform:translateY(-1px);}
+
+/* ── Stats bar ───────────────────────────────────────────── */
+.stats-bar{
+  display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:1.2rem;
+}
+.stat-chip{
+  background:var(--card);border:1.5px solid var(--border);border-radius:50px;
+  padding:.35rem 1rem;font-size:.78rem;font-weight:600;color:var(--mid);
+  display:flex;align-items:center;gap:.35rem;
+}
+.stat-chip b{color:var(--text);}
+.stat-chip.total{border-color:var(--mi);color:var(--mi);}
+.stat-chip.total b{color:var(--mi);}
+
+/* ── Skeleton / loading ──────────────────────────────────── */
+.skel{
+  background:linear-gradient(90deg,var(--border) 25%,var(--mp) 50%,var(--border) 75%);
+  background-size:200% 100%;animation:sk 1.5s infinite;
+  border-radius:16px;height:140px;margin-bottom:.8rem;
+}
+@keyframes sk{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ── Tabla de reporte ────────────────────────────────────── */
+.table-wrap{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:16px;overflow:hidden;margin-bottom:1.5rem;
+}
+.table-header{
+  padding:.9rem 1.2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;
+}
+.table-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+.table-sub{font-size:.75rem;color:var(--mid);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:linear-gradient(135deg,rgba(232,213,255,.25),rgba(255,229,240,.15));}
+th{
+  text-align:left;padding:.75rem 1rem;font-size:.68rem;font-weight:700;
+  color:var(--mid);text-transform:uppercase;letter-spacing:.08em;
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:.75rem 1rem;font-size:.82rem;border-bottom:1px solid rgba(237,232,255,.5);
+  vertical-align:top;line-height:1.5;
+}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(245,242,255,.5);}
+.tbadge{
+  display:inline-flex;align-items:center;padding:.15rem .6rem;
+  border-radius:50px;font-size:.66rem;font-weight:700;white-space:nowrap;
+}
+.t-cita{background:#fdf4ff;color:#9333ea;}
+.t-empresa{background:#eff6ff;color:#2563eb;}
+.t-escuela{background:#f0fdf4;color:#16a34a;}
+.motivo-cell{max-width:220px;font-size:.76rem;color:var(--mid);}
+.empty-row td{text-align:center;padding:3rem 1rem;color:var(--mid);}
+
+/* ── Toasts ──────────────────────────────────────────────── */
+.toasts{position:fixed;bottom:1.5rem;right:1.5rem;display:flex;flex-direction:column;gap:.5rem;z-index:9999;pointer-events:none;max-width:320px;}
+.toast{
+  background:#1e1b2e;color:#fff;padding:.8rem 1.2rem;border-radius:12px;
+  font-size:.84rem;font-weight:600;display:flex;align-items:center;gap:.5rem;
+  box-shadow:0 8px 28px rgba(0,0,0,.3);animation:tin .3s ease;
+}
+@keyframes tin{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:none;}}
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.spinner{
+  display:inline-block;width:14px;height:14px;
+  border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;
+  border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;
+}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* ═══════════════════════════════════════════════════════════
+   ESTILOS DE IMPRESIÓN / PDF
+═══════════════════════════════════════════════════════════ */
+@media print{
+  body{background:#fff;color:#000;font-size:10pt;}
+  .topbar,.filtros-panel,.stats-bar,.no-print,.toasts{display:none!important;}
+  .main{padding:0;max-width:100%;}
+  .table-wrap{border:1pt solid #ddd;border-radius:0;margin:0;}
+  .table-header{padding:.5cm .6cm;}
+  th{background:#f0e8ff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  tr:hover td{background:transparent;}
+  .pdf-header{display:block!important;}
+  .tbadge{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  table{page-break-inside:auto;}
+  tr{page-break-inside:avoid;}
+}
+
+/* ── PDF header (visible solo al imprimir) ───────────────── */
+.pdf-header{
+  display:none;padding:.5cm 0 .4cm;border-bottom:2pt solid #A67FFF;
+  margin-bottom:.4cm;
+}
+.pdf-header h1{font-family:'Syne',sans-serif;font-size:14pt;color:#2D2A3D;}
+.pdf-header .pdf-meta{font-size:8pt;color:#5A5570;margin-top:4pt;display:flex;gap:1cm;flex-wrap:wrap;}
+.pdf-header .pdf-logo{font-size:11pt;margin-right:.3cm;}
+</style>
+</head>
+<body>
+
+<!-- ── Topbar ─────────────────────────────────────────────── -->
+<div class="topbar">
+  <div class="tb-l">
+    <div class="tb-logo">📊</div>
+    <div class="tb-brand">Reporte <span>Formularios</span></div>
+  </div>
+  <div style="display:flex;gap:.5rem;">
+    <button class="btn btn-ghost" style="font-size:.78rem;" onclick="cargar()">↺ Recargar datos</button>
+    <button class="btn btn-pdf no-print" id="btn-pdf" onclick="generarPDF()">🖨️ Exportar PDF</button>
+  </div>
+</div>
+
+<!-- ── Main ────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- Panel de filtros -->
+  <div class="filtros-panel no-print">
+    <div class="fg">
+      <label>Fecha desde</label>
+      <input type="date" id="f-desde">
+    </div>
+    <div class="fg">
+      <label>Fecha hasta</label>
+      <input type="date" id="f-hasta">
+    </div>
+    <div class="fg">
+      <label>Tipo de servicio</label>
+      <select id="f-tipo">
+        <option value="todos">Todos los tipos</option>
+        <option value="cita">🟣 Citas personales</option>
+        <option value="empresa">🔵 Empresas</option>
+        <option value="escuela">🟢 Escuelas</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Estado</label>
+      <select id="f-estado">
+        <option value="todos">Todos los estados</option>
+        <option value="Pendiente">Pendiente</option>
+        <option value="En espera">En espera</option>
+        <option value="Atendido">Atendido</option>
+        <option value="Cancelado">Cancelado</option>
+      </select>
+    </div>
+    <div class="filtros-actions">
+      <button class="btn btn-ghost" onclick="limpiarFiltros()">✕ Limpiar</button>
+      <button class="btn btn-primary" id="btn-filtrar" onclick="aplicarFiltros()">🔍 Aplicar filtros</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar no-print" id="stats-bar" style="display:none;">
+    <div class="stat-chip total">Total filtrado: <b id="s-total">0</b></div>
+    <div class="stat-chip">🟣 Citas: <b id="s-cita">0</b></div>
+    <div class="stat-chip">🔵 Empresas: <b id="s-empresa">0</b></div>
+    <div class="stat-chip">🟢 Escuelas: <b id="s-escuela">0</b></div>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div id="loading">
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </div>
+
+  <!-- Tabla de reporte -->
+  <div class="table-wrap" id="report-wrap" style="display:none;">
+
+    <!-- Header visible al imprimir -->
+    <div class="pdf-header" id="pdf-header">
+      <h1><span class="pdf-logo">📋</span> Reporte de Formularios — Bienestar Emocional</h1>
+      <div class="pdf-meta">
+        <span id="pdf-rango"></span>
+        <span id="pdf-tipo-txt"></span>
+        <span id="pdf-estado-txt"></span>
+        <span id="pdf-generado"></span>
+        <span id="pdf-total-txt"></span>
+      </div>
+    </div>
+
+    <div class="table-header">
+      <div>
+        <div class="table-title">📋 Listado de formularios</div>
+        <div class="table-sub" id="table-sub">—</div>
+      </div>
+      <div style="font-size:.75rem;color:var(--mid);" id="table-count"></div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table id="report-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Entidad / Empresa</th>
+            <th>Servicio</th>
+            <th>Estado</th>
+            <th>Motivo / Observaciones</th>
+          </tr>
+        </thead>
+        <tbody id="report-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+'use strict';
+/* ── Config ────────────────────────────────────────────── */
+var PROXY = 'https://script.google.com/macros/s/AKfycbz-_1X-c3aZ2lJ4N6m3R5tP2l2cznIs7Seuvkb5X5J1oPVrIXDwkEHi936b4dXg5JxO/exec';
+
+var todosLosFormularios = [];
+var filtrados = [];
+
+/* ── Init ──────────────────────────────────────────────── */
+(function init(){
+  // Defaults: último mes
+  var hoy = new Date();
+  var hace30 = new Date(hoy);
+  hace30.setDate(hoy.getDate() - 30);
+  document.getElementById('f-hasta').value = formatDate(hoy);
+  document.getElementById('f-desde').value = formatDate(hace30);
+  cargar();
+})();
+
+/* ── API ───────────────────────────────────────────────── */
+function apiGet(tab){
+  return fetch(PROXY + '?tab=' + encodeURIComponent(tab), {redirect:'follow'})
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var j = JSON.parse(t);
+      if(!j.ok) throw new Error(j.error || 'Error en el servidor');
+      return j;
+    });
+}
+
+/* ── Cargar datos desde Google Sheets ─────────────────── */
+function cargar(){
+  document.getElementById('loading').style.display = '';
+  document.getElementById('report-wrap').style.display = 'none';
+  document.getElementById('stats-bar').style.display = 'none';
+
+  // Intentar leer todas las pestañas; el endpoint FormulariosPendientes devuelve las 3
+  apiGet('FormulariosPendientes')
+    .then(function(j){
+      todosLosFormularios = j.formularios || [];
+      document.getElementById('loading').style.display = 'none';
+      aplicarFiltros();
+      toast('✅ ' + todosLosFormularios.length + ' formularios cargados', 'ok');
+    })
+    .catch(function(e){
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('report-wrap').style.display = '';
+      var tbody = document.getElementById('report-tbody');
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="10">⚠️ Error al cargar datos:<br><small>' + esc(e.message) + '</small></td></tr>';
+      toast('Error: ' + e.message, 'err');
+    });
+}
+
+/* ── Aplicar filtros ───────────────────────────────────── */
+function aplicarFiltros(){
+  var desde = document.getElementById('f-desde').value;
+  var hasta = document.getElementById('f-hasta').value;
+  var tipo  = document.getElementById('f-tipo').value;
+  var estado = document.getElementById('f-estado').value;
+
+  filtrados = todosLosFormularios.filter(function(f){
+    // Filtro tipo
+    if(tipo !== 'todos' && f._tipo !== tipo) return false;
+    // Filtro estado
+    if(estado !== 'todos' && (f.estado || 'Pendiente') !== estado) return false;
+    // Filtro fechas por timestamp
+    if(desde || hasta){
+      var ts = f.timestamp ? new Date(f.timestamp) : null;
+      if(ts){
+        if(desde && ts < new Date(desde + 'T00:00:00')) return false;
+        if(hasta && ts > new Date(hasta + 'T23:59:59')) return false;
+      }
+    }
+    return true;
+  });
+
+  renderTabla(filtrados);
+  actualizarStats(filtrados);
+  actualizarPDFHeader(desde, hasta, tipo, estado, filtrados.length);
+}
+
+/* ── Limpiar filtros ───────────────────────────────────── */
+function limpiarFiltros(){
+  var hoy = new Date();
+  var hace30 = new Date(hoy);
+  hace30.setDate(hoy.getDate() - 30);
+  document.getElementById('f-hasta').value = formatDate(hoy);
+  document.getElementById('f-desde').value = formatDate(hace30);
+  document.getElementById('f-tipo').value = 'todos';
+  document.getElementById('f-estado').value = 'todos';
+  aplicarFiltros();
+}
+
+/* ── Render tabla ──────────────────────────────────────── */
+function renderTabla(lista){
+  var tbody = document.getElementById('report-tbody');
+  var wrap  = document.getElementById('report-wrap');
+  wrap.style.display = '';
+
+  if(!lista.length){
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="10">📭 Sin resultados para los filtros aplicados.</td></tr>';
+    document.getElementById('table-count').textContent = '0 registros';
+    return;
+  }
+
+  var tm = {
+    cita:    ['🟣','t-cita','Cita personal'],
+    empresa: ['🔵','t-empresa','Empresa'],
+    escuela: ['🟢','t-escuela','Escuela']
+  };
+
+  var estadoColors = {
+    'Pendiente': 'background:#fff7ed;color:#ea580c;',
+    'En espera': 'background:#eff6ff;color:#2563eb;',
+    'Atendido':  'background:#f0fdf4;color:#16a34a;',
+    'Cancelado': 'background:#fef2f2;color:#dc2626;'
+  };
+
+  tbody.innerHTML = lista.map(function(f, i){
+    var t  = tm[f._tipo] || ['📋','t-cita', f._tipo || '—'];
+    var ts = '';
+    if(f.timestamp){
+      try{
+        ts = new Date(f.timestamp).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+      } catch(e){ ts = (f.timestamp||'').substring(0,10); }
+    }
+    var estadoVal = f.estado || 'Pendiente';
+    var estadoStyle = estadoColors[estadoVal] || 'background:#f3f4f6;color:#6b7280;';
+    var motivo = esc((f.motivo || '').substring(0, 120)) + (f.motivo && f.motivo.length > 120 ? '…' : '');
+    var entidad = esc(f.entidad || f.nombre_empresa || f.nombre_escuela || '—');
+
+    return '<tr>'
+      + '<td style="color:var(--mid);font-size:.72rem;">' + (i+1) + '</td>'
+      + '<td style="white-space:nowrap;font-size:.78rem;">' + (ts || '—') + '</td>'
+      + '<td><span class="tbadge ' + t[1] + '">' + t[0] + ' ' + t[2] + '</span></td>'
+      + '<td><strong style="font-size:.84rem;">' + esc(f.nombre || '—') + '</strong>'
+        + (f.id_contacto ? '<br><span style="font-size:.66rem;color:var(--mid);">' + esc(f.id_contacto) + '</span>' : '') + '</td>'
+      + '<td style="white-space:nowrap;">' + esc(f.telefono || '—') + '</td>'
+      + '<td style="font-size:.76rem;word-break:break-all;">' + esc(f.correo || '—') + '</td>'
+      + '<td>' + (entidad !== '—' ? entidad : '<span style="color:var(--mid);">—</span>') + '</td>'
+      + '<td style="font-size:.8rem;">' + esc(f.servicio || '—') + '</td>'
+      + '<td><span class="tbadge" style="' + estadoStyle + '">' + esc(estadoVal) + '</span></td>'
+      + '<td class="motivo-cell">' + (motivo || '<span style="color:var(--mid);">—</span>') + '</td>'
+      + '</tr>';
+  }).join('');
+
+  document.getElementById('table-count').textContent = lista.length + ' registro' + (lista.length !== 1 ? 's' : '');
+
+  // Subtítulo de tabla
+  var desde = document.getElementById('f-desde').value;
+  var hasta = document.getElementById('f-hasta').value;
+  var sub = '';
+  if(desde && hasta) sub = 'Del ' + formatDateHuman(desde) + ' al ' + formatDateHuman(hasta);
+  else if(desde) sub = 'Desde ' + formatDateHuman(desde);
+  else if(hasta) sub = 'Hasta ' + formatDateHuman(hasta);
+  else sub = 'Todos los registros';
+  document.getElementById('table-sub').textContent = sub;
+}
+
+/* ── Stats bar ─────────────────────────────────────────── */
+function actualizarStats(lista){
+  document.getElementById('stats-bar').style.display = 'flex';
+  document.getElementById('s-total').textContent   = lista.length;
+  document.getElementById('s-cita').textContent    = lista.filter(function(f){return f._tipo==='cita';}).length;
+  document.getElementById('s-empresa').textContent = lista.filter(function(f){return f._tipo==='empresa';}).length;
+  document.getElementById('s-escuela').textContent = lista.filter(function(f){return f._tipo==='escuela';}).length;
+}
+
+/* ── Header para PDF ───────────────────────────────────── */
+function actualizarPDFHeader(desde, hasta, tipo, estado, total){
+  var tipoMap = {
+    todos:'Todos los tipos','cita':'Citas personales','empresa':'Empresas','escuela':'Escuelas'
+  };
+  var rango = '';
+  if(desde && hasta) rango = 'Período: ' + formatDateHuman(desde) + ' — ' + formatDateHuman(hasta);
+  else if(desde) rango = 'Desde: ' + formatDateHuman(desde);
+  else if(hasta) rango = 'Hasta: ' + formatDateHuman(hasta);
+  else rango = 'Todos los períodos';
+
+  document.getElementById('pdf-rango').textContent        = rango;
+  document.getElementById('pdf-tipo-txt').textContent     = 'Tipo: ' + (tipoMap[tipo] || tipo);
+  document.getElementById('pdf-estado-txt').textContent   = 'Estado: ' + (estado === 'todos' ? 'Todos' : estado);
+  document.getElementById('pdf-total-txt').textContent    = 'Total: ' + total + ' registros';
+  document.getElementById('pdf-generado').textContent     = 'Generado: ' + new Date().toLocaleString('es-MX');
+}
+
+/* ── Generar PDF (ventana de impresión) ────────────────── */
+function generarPDF(){
+  if(!filtrados.length){
+    toast('No hay datos para exportar', 'warn');
+    return;
+  }
+  actualizarPDFHeader(
+    document.getElementById('f-desde').value,
+    document.getElementById('f-hasta').value,
+    document.getElementById('f-tipo').value,
+    document.getElementById('f-estado').value,
+    filtrados.length
+  );
+  setTimeout(function(){ window.print(); }, 150);
+}
+
+/* ── Helpers ───────────────────────────────────────────── */
+function formatDate(d){
+  return d.toISOString().substring(0,10);
+}
+function formatDateHuman(str){
+  if(!str) return '';
+  try{
+    return new Date(str + 'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+  } catch(e){ return str; }
+}
+function esc(s){
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function toast(msg, type){
+  var c = document.getElementById('toasts');
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.style.borderLeft = '3px solid ' + (type==='ok'?'var(--ok)':type==='err'?'var(--err)':'var(--warn)');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(function(){
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(40px)';
+    t.style.transition = '.3s';
+    setTimeout(function(){ t.remove(); }, 350);
+  }, 3500);
+}
+</script>
+</body>
+</html>
