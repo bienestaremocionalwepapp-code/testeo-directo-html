@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor — Bienestar Emocional</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rosa: #FF85C0;
+  --morado: #A67FFF;
+  --morado-dark: #7C4DCC;
+  --morado-light: #EDE5FF;
+  --text: #1E1530;
+  --text-mid: #6B5F85;
+  --text-soft: #B0A3CC;
+  --bg: #F8F5FF;
+  --white: #FFFFFF;
+  --border: #E8E0F5;
+  --success: #25D366;
+  --danger: #FF4D6D;
+  --warning: #FFB800;
+  --shadow: 0 4px 24px rgba(166,127,255,0.15);
+  --shadow-lg: 0 12px 48px rgba(166,127,255,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── LOGIN ── */
+#login-screen{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;background:linear-gradient(145deg,#FFE5F0 0%,#EDE5FF 60%,#E8D5FF 100%);
+  padding:20px;
+}
+.login-card{
+  background:var(--white);border-radius:28px;padding:2.5rem 2rem;
+  width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center;
+}
+.login-card h1{font-family:'Outfit',sans-serif;font-size:1.6rem;color:var(--morado);margin-bottom:.3rem;}
+.login-card p{color:var(--text-soft);font-size:.85rem;margin-bottom:2rem;}
+.lf{margin-bottom:1rem;text-align:left;}
+.lf label{display:block;font-size:.7rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;}
+.lf input{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:.95rem;outline:none;transition:border .2s;}
+.lf input:focus{border-color:var(--morado);}
+.login-btn{width:100%;padding:.9rem;background:linear-gradient(135deg,var(--rosa),var(--morado));color:#fff;border:none;border-radius:50px;font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.5rem;}
+.login-err{color:var(--danger);font-size:.8rem;margin-top:.75rem;display:none;}
+
+/* ── LAYOUT ── */
+#app{display:none;min-height:100vh;}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:var(--white);border-bottom:1.5px solid var(--border);
+  padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 12px rgba(166,127,255,0.08);
+}
+.topbar-left{display:flex;align-items:center;gap:.75rem;}
+.topbar-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--rosa),var(--morado));display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.topbar h2{font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:var(--morado);}
+.topbar-right{display:flex;align-items:center;gap:.75rem;}
+.btn-sm{padding:.4rem .9rem;border-radius:50px;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid;transition:all .2s;}
+.btn-sm.outline{border-color:var(--border);background:transparent;color:var(--text-mid);}
+.btn-sm.outline:hover{border-color:var(--morado);color:var(--morado);}
+.btn-sm.primary{border-color:var(--morado);background:var(--morado);color:#fff;}
+.btn-sm.primary:hover{background:var(--morado-dark);border-color:var(--morado-dark);}
+.btn-sm.success{border-color:var(--success);background:var(--success);color:#fff;}
+.btn-sm.danger{border-color:var(--danger);background:var(--danger);color:#fff;}
+
+.main-content{padding:1.5rem;max-width:900px;margin:0 auto;}
+
+/* ── TABS NAV ── */
+.tabs-nav{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.tab-btn{padding:.5rem 1.1rem;border-radius:50px;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--text-mid);transition:all .2s;}
+.tab-btn.active{background:linear-gradient(135deg,var(--rosa),var(--morado));color:#fff;border-color:transparent;}
+
+/* ── PANEL CARDS ── */
+.panel{display:none;}
+.panel.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(--white);border-radius:20px;border:1.5px solid var(--border);margin-bottom:1.2rem;overflow:hidden;box-shadow:var(--shadow);}
+.card-header{padding:1.1rem 1.4rem;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:.7rem;background:linear-gradient(135deg,#FFF5FB,#F5F0FF);}
+.card-header h3{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--text);}
+.card-header .ico{font-size:1.2rem;}
+.card-body{padding:1.4rem;}
+
+/* ── SECCIONES TOGGLE ── */
+.secciones-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;}
+.seccion-item{
+  border:1.5px solid var(--border);border-radius:16px;padding:1rem 1.2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);transition:all .25s;cursor:pointer;
+  user-select:none;-webkit-user-select:none;
+}
+.seccion-item:hover{border-color:var(--morado);box-shadow:0 4px 16px rgba(166,127,255,.1);}
+.seccion-item.active{border-color:var(--success);background:#F0FFF6;}
+.seccion-item.inactive{border-color:var(--danger);background:#FFF5F7;opacity:.85;}
+.sec-left{display:flex;align-items:center;gap:.75rem;}
+.sec-ico{font-size:1.4rem;}
+.sec-info h4{font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:700;color:var(--text);}
+.sec-info p{font-size:.74rem;color:var(--text-soft);margin-top:.1rem;}
+/* Toggle switch */
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{
+  position:absolute;inset:0;border-radius:24px;
+  background:#D1C4E9;transition:background .2s;cursor:pointer;
+}
+.toggle-track::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:18px;height:18px;border-radius:50%;background:#fff;
+  transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2);
+}
+.toggle input:checked + .toggle-track{background:var(--success);}
+.toggle input:checked + .toggle-track::after{transform:translateX(20px);}
+
+/* ── COLORES ── */
+.colores-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:600px){.colores-grid{grid-template-columns:1fr;}}
+.color-item{
+  border:1.5px solid var(--border);border-radius:14px;padding:1rem 1.1rem;
+  display:flex;align-items:center;gap:.9rem;background:var(--bg);
+  transition:border-color .2s;
+}
+.color-item:hover{border-color:var(--morado);}
+.color-preview{
+  width:40px;height:40px;border-radius:10px;border:2px solid rgba(0,0,0,.08);
+  flex-shrink:0;cursor:pointer;transition:transform .15s;
+}
+.color-preview:hover{transform:scale(1.1);}
+.color-info{flex:1;min-width:0;}
+.color-info label{display:block;font-size:.7rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.25rem;}
+.color-info span{font-size:.82rem;color:var(--text);font-family:monospace;font-weight:600;}
+.color-picker-wrap{position:relative;}
+.color-picker-wrap input[type="color"]{
+  position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;
+}
+
+/* Variables CSS globales que exportamos */
+.var-chip{
+  display:inline-block;background:var(--morado-light);color:var(--morado-dark);
+  border-radius:6px;padding:.15rem .5rem;font-size:.72rem;font-family:monospace;font-weight:600;
+  margin-top:.3rem;
+}
+
+/* ── PREVIEW INLINE ── */
+.preview-bar{
+  background:linear-gradient(135deg,var(--rosa),var(--morado));
+  border-radius:12px;padding:1rem 1.4rem;margin-bottom:1.2rem;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;
+}
+.preview-bar p{color:rgba(255,255,255,.85);font-size:.82rem;}
+.preview-bar a{color:#fff;font-size:.82rem;font-weight:600;text-decoration:none;}
+
+/* ── SAVE BAR ── */
+.save-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--white);border-top:1.5px solid var(--border);
+  padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 -4px 24px rgba(166,127,255,.12);
+  transform:translateY(100%);transition:transform .3s ease;
+}
+.save-bar.visible{transform:translateY(0);}
+.save-bar p{font-size:.85rem;color:var(--text-mid);}
+.save-bar-actions{display:flex;gap:.75rem;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--text);color:#fff;border-radius:50px;padding:.65rem 1.4rem;
+  font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:600;
+  opacity:0;transition:all .3s;pointer-events:none;z-index:9999;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.success{background:var(--success);}
+.toast.error{background:var(--danger);}
+
+/* ── SPINNER ── */
+.spin{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:.4rem;}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+.hint{font-size:.78rem;color:var(--text-soft);margin-top:.6rem;line-height:1.5;}
+
+/* script de colores dinámicos — se inyecta en la página */
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div style="font-size:2.5rem;margin-bottom:.5rem;">??</div>
+    <h1>Editor</h1>
+    <p>Bienestar Emocional — Panel de control</p>
+    <div class="lf"><label>Usuario</label><input type="text" id="l-user" placeholder="admin" autocomplete="off"></div>
+    <div class="lf"><label>Contraseña</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+    <button class="login-btn" onclick="doLogin()">Entrar →</button>
+    <p class="login-err" id="login-err">Usuario o contraseña incorrectos</p>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">??</div>
+      <h2>Editor Bienestar</h2>
+    </div>
+    <div class="topbar-right">
+      <a href="https://bienestaremocionalwepapp-code.github.io/Bienestar-Emocional-Online/" target="_blank" class="btn-sm outline">Ver sitio →</a>
+      <button class="btn-sm outline" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- Tabs nav -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('secciones',this)">??️ Secciones</button>
+      <button class="tab-btn" onclick="switchTab('colores',this)">?? Colores de texto</button>
+    </div>
+
+    <!-- ══ PANEL SECCIONES ══ -->
+    <div class="panel active" id="panel-secciones">
+      <div class="preview-bar">
+        <p>?? Activa o desactiva cada sección del sitio. Los cambios se guardan en la hoja <b>Config</b>.</p>
+        <a href="https://bienestaremocionalwepapp-code.github.io/Bienestar-Emocional-Online/" target="_blank">Ver sitio ↗</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="ico">??️</span>
+          <div>
+            <h3>Visibilidad de secciones</h3>
+            <p style="font-size:.78rem;color:var(--text-soft);margin-top:.15rem;">Haz clic para mostrar u ocultar cada sección</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="secciones-grid" id="secciones-grid">
+            <!-- Se genera por JS -->
+          </div>
+          <p class="hint">ℹ️ El sitio lee el campo <code>seccion_[nombre]_visible</code> de la hoja Config. Si el valor es <code>false</code>, la sección se oculta con <code>display:none</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PANEL COLORES ══ -->
+    <div class="panel" id="panel-colores">
+      <div class="preview-bar">
+        <p>?? Edita los colores de texto del sitio. Los cambios se guardan en la hoja <b>Config</b>.</p>
+        <a href="https://bienestaremocionalwepapp-code.github.io/Bienestar-Emocional-Online/" target="_blank">Ver sitio ↗</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="ico">??️</span>
+          <div>
+            <h3>Colores de texto — Títulos (h1, h2)</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="colores-grid" id="grid-titulos"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="ico">??</span>
+          <div>
+            <h3>Colores de texto — Párrafos y subtítulos</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="colores-grid" id="grid-parrafos"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="ico">??</span>
+          <div>
+            <h3>Colores de texto — Botones</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="colores-grid" id="grid-botones"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="ico">??</span>
+          <div>
+            <h3>Colores de texto — Links y redes sociales</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="colores-grid" id="grid-links"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="ico">??</span><h3>Código CSS generado</h3></div>
+        <div class="card-body">
+          <p style="font-size:.82rem;color:var(--text-mid);margin-bottom:.75rem;">Copia este bloque en el <code>&lt;style&gt;</code> de tu <b>index.html</b> para aplicar los colores:</p>
+          <textarea id="css-output" readonly
+            style="width:100%;min-height:200px;border:1.5px solid var(--border);border-radius:12px;padding:1rem;font-family:monospace;font-size:.78rem;background:#FAFAFA;color:var(--text);resize:vertical;outline:none;"
+          ></textarea>
+          <button class="btn-sm primary" style="margin-top:.75rem;" onclick="copiarCSS()">?? Copiar CSS</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<!-- Save bar -->
+<div class="save-bar" id="save-bar">
+  <p id="save-bar-msg">Tienes cambios sin guardar</p>
+  <div class="save-bar-actions">
+    <button class="btn-sm outline" onclick="descartarCambios()">Descartar</button>
+    <button class="btn-sm success" id="btn-guardar" onclick="guardarCambios()">?? Guardar todo</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════════════
+var PROXY = 'https://script.google.com/macros/s/AKfycbz-_1X-c3aZ2lJ4N6m3R5tP2l2cznIs7Seuvkb5X5J1oPVrIXDwkEHi936b4dXg5JxO/exec';
+
+// Credenciales (igual que el editor original, cargadas desde la hoja Usuarios)
+var SESSION_KEY = 'be_editor_session';
+
+// ── Secciones del sitio ──
+var SECCIONES = [
+  { id:'header',     label:'Header / Logo',       ico:'??', campo:'seccion_header_visible',     desc:'Encabezado con logo y título' },
+  { id:'quienes',    label:'¿Quiénes somos?',      ico:'??', campo:'seccion_quienes_visible',    desc:'Imagen y texto del consultorio' },
+  { id:'hero',       label:'Banner hero',          ico:'✨', campo:'seccion_hero_visible',       desc:'Frase principal del sitio' },
+  { id:'servicios',  label:'Solicitud servicios',  ico:'??️', campo:'seccion_servicios_visible',  desc:'Tarjetas: Empresas, Escuelas…' },
+  { id:'disponib',   label:'Disponibilidad',       ico:'??', campo:'seccion_disponib_visible',   desc:'Botón "Ver días disponibles"' },
+  { id:'mapa',       label:'Mapa / Ubicación',     ico:'??', campo:'seccion_mapa_visible',       desc:'Google Maps embed' },
+  { id:'contacto',   label:'Datos de contacto',    ico:'??', campo:'seccion_contacto_visible',   desc:'Tel, correo, horario' },
+  { id:'redes',      label:'Redes sociales',       ico:'??', campo:'seccion_redes_visible',      desc:'Facebook e Instagram' },
+  { id:'footer',     label:'Footer',               ico:'??', campo:'seccion_footer_visible',     desc:'Pie de página' },
+  { id:'whatsapp',   label:'Botón WhatsApp',       ico:'??', campo:'seccion_whatsapp_visible',   desc:'Botón flotante de WhatsApp' },
+];
+
+// ── Definición de colores CSS ──
+var COLOR_GROUPS = {
+  titulos: [
+    { id:'color_h1',           label:'H1 — Título principal',          cssVar:'--color-h1',           default:'#A67FFF', selector:'h1' },
+    { id:'color_h2',           label:'H2 — Títulos de sección',        cssVar:'--color-h2',           default:'#A67FFF', selector:'h2' },
+    { id:'color_h1_header',    label:'H1 — Color en header',           cssVar:'--color-h1-header',    default:'#A67FFF', selector:'header h1' },
+    { id:'color_card_title',   label:'Títulos de tarjetas',            cssVar:'--color-card-title',   default:'#A67FFF', selector:'.service-card-title' },
+    { id:'color_modal_h3',     label:'Títulos de modales',             cssVar:'--color-modal-h3',     default:'#A67FFF', selector:'.modal h3' },
+  ],
+  parrafos: [
+    { id:'color_body_text',    label:'Texto general del sitio',        cssVar:'--color-body',         default:'#2D2A3D', selector:'body' },
+    { id:'color_text_medio',   label:'Texto secundario (subtítulos)',  cssVar:'--color-text-medio',   default:'#5A5570', selector:'header p, .section p' },
+    { id:'color_hero_desc',    label:'Texto descripción hero',        cssVar:'--color-hero-desc',    default:'#5A5570', selector:'#hero-descripcion' },
+    { id:'color_footer_txt',   label:'Texto del footer',              cssVar:'--color-footer-text',  default:'#FFFFFF', selector:'footer p' },
+  ],
+  botones: [
+    { id:'color_btn_text',     label:'Texto en botones principales',   cssVar:'--color-btn-text',     default:'#FFFFFF', selector:'.service-card-button, .cta-button' },
+    { id:'color_mapa_btn',     label:'Texto botón del mapa',           cssVar:'--color-mapa-btn',     default:'#FFFFFF', selector:'.mapa-btn' },
+    { id:'color_sol_btn',      label:'Texto botón solicitar cita',     cssVar:'--color-sol-btn',      default:'#FFFFFF', selector:'.sol-btn' },
+  ],
+  links: [
+    { id:'color_tel_link',     label:'Enlace de teléfono',             cssVar:'--color-tel-link',     default:'#007BFF', selector:'#ctc-tel-link' },
+    { id:'color_email_link',   label:'Enlace de correo',               cssVar:'--color-email-link',   default:'#007BFF', selector:'#ctc-email-link' },
+    { id:'color_social_text',  label:'Texto botones de redes',         cssVar:'--color-social-text',  default:'#FFFFFF', selector:'.social-links a' },
+  ]
+};
+
+// ════════════════════════════════════════════════════════
+//  ESTADO
+// ════════════════════════════════════════════════════════
+var state = {
+  secciones: {},   // { campo: true/false }
+  colores: {},     // { id: '#hex' }
+  dirty: false
+};
+var configRemoto = {}; // lo que vino del servidor
+
+// ════════════════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════════════════
+function doLogin() {
+  var u = document.getElementById('l-user').value.trim();
+  var p = document.getElementById('l-pass').value.trim();
+  if (!u || !p) { showErr('Completa los campos'); return; }
+
+  fetch(PROXY + '?tab=Usuarios')
+    .then(function(r){ return r.json(); })
+    .then(function(j) {
+      if (!j.ok) throw new Error('Sin acceso');
+      var d = j.data, ok = false, nombre = '';
+      for (var i = 1; i <= 10; i++) {
+        if (d['login_'+i] === u && d['pass_'+i] === p && d['activo_'+i] === 'true') {
+          ok = true; nombre = d['nombre_'+i]; break;
+        }
+      }
+      if (!ok) { showErr('Usuario o contraseña incorrectos'); return; }
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ u: u, nombre: nombre }));
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      initApp();
+    })
+    .catch(function() { showErr('Error de conexión'); });
+}
+function showErr(m){ var el=document.getElementById('login-err'); el.textContent=m; el.style.display='block'; }
+function doLogout(){ sessionStorage.removeItem(SESSION_KEY); location.reload(); }
+
+document.getElementById('l-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+// Auto-login si hay sesión
+(function(){
+  var s = sessionStorage.getItem(SESSION_KEY);
+  if (s) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  }
+})();
+
+// ════════════════════════════════════════════════════════
+//  INIT APP
+// ════════════════════════════════════════════════════════
+function initApp() {
+  buildSeccionesGrid();
+  buildColorGrids();
+  loadConfig();
+}
+
+function loadConfig() {
+  fetch(PROXY + '?tab=Config')
+    .then(function(r){ return r.json(); })
+    .then(function(j) {
+      if (!j.ok) return;
+      configRemoto = j.data || {};
+      // Cargar estado secciones
+      SECCIONES.forEach(function(s) {
+        var val = configRemoto[s.campo];
+        // Si no existe el campo aún, asumimos visible=true
+        state.secciones[s.campo] = (val === undefined || val === '' || val === 'true');
+      });
+      // Cargar colores
+      Object.keys(COLOR_GROUPS).forEach(function(grupo) {
+        COLOR_GROUPS[grupo].forEach(function(c) {
+          var val = configRemoto[c.id];
+          state.colores[c.id] = val || c.default;
+        });
+      });
+      renderSecciones();
+      renderColores();
+      updateCSSOutput();
+    })
+    .catch(function(e){ toast('Error cargando config: '+e.message, 'error'); });
+}
+
+// ════════════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════
+//  SECCIONES
+// ════════════════════════════════════════════════════════
+function buildSeccionesGrid() {
+  var g = document.getElementById('secciones-grid');
+  g.innerHTML = '';
+  SECCIONES.forEach(function(s) {
+    var div = document.createElement('div');
+    div.className = 'seccion-item';
+    div.id = 'sec-item-' + s.id;
+    div.innerHTML = '<div class="sec-left">'
+      + '<span class="sec-ico">'+s.ico+'</span>'
+      + '<div class="sec-info"><h4>'+s.label+'</h4><p>'+s.desc+'</p></div>'
+      + '</div>'
+      + '<label class="toggle" onclick="event.stopPropagation()">'
+      +   '<input type="checkbox" id="toggle-'+s.id+'" onchange="onSeccionChange(\''+s.campo+'\',this.checked)">'
+      +   '<span class="toggle-track"></span>'
+      + '</label>';
+    div.addEventListener('click', function() {
+      var inp = document.getElementById('toggle-' + s.id);
+      inp.checked = !inp.checked;
+      onSeccionChange(s.campo, inp.checked);
+    });
+    g.appendChild(div);
+  });
+}
+
+function renderSecciones() {
+  SECCIONES.forEach(function(s) {
+    var inp = document.getElementById('toggle-' + s.id);
+    var item = document.getElementById('sec-item-' + s.id);
+    if (!inp) return;
+    var visible = state.secciones[s.campo];
+    inp.checked = visible;
+    item.className = 'seccion-item ' + (visible ? 'active' : 'inactive');
+  });
+}
+
+function onSeccionChange(campo, checked) {
+  state.secciones[campo] = checked;
+  // Update visual
+  SECCIONES.forEach(function(s) {
+    if (s.campo !== campo) return;
+    var item = document.getElementById('sec-item-' + s.id);
+    if (item) item.className = 'seccion-item ' + (checked ? 'active' : 'inactive');
+  });
+  markDirty();
+}
+
+// ════════════════════════════════════════════════════════
+//  COLORES
+// ════════════════════════════════════════════════════════
+function buildColorGrids() {
+  Object.keys(COLOR_GROUPS).forEach(function(grupo) {
+    var grid = document.getElementById('grid-' + grupo);
+    if (!grid) return;
+    grid.innerHTML = '';
+    COLOR_GROUPS[grupo].forEach(function(c) {
+      var div = document.createElement('div');
+      div.className = 'color-item';
+      div.id = 'citem-' + c.id;
+      div.innerHTML = '<div class="color-picker-wrap">'
+        + '<div class="color-preview" id="prev-'+c.id+'" style="background:'+c.default+'"></div>'
+        + '<input type="color" id="inp-'+c.id+'" value="'+c.default+'" oninput="onColorChange(\''+c.id+'\',this.value)">'
+        + '</div>'
+        + '<div class="color-info">'
+        +   '<label>'+c.label+'</label>'
+        +   '<span id="val-'+c.id+'">'+c.default+'</span>'
+        +   '<br><span class="var-chip">'+c.cssVar+'</span>'
+        + '</div>';
+      grid.appendChild(div);
+    });
+  });
+}
+
+function renderColores() {
+  Object.keys(COLOR_GROUPS).forEach(function(grupo) {
+    COLOR_GROUPS[grupo].forEach(function(c) {
+      var color = state.colores[c.id] || c.default;
+      var prev = document.getElementById('prev-' + c.id);
+      var inp  = document.getElementById('inp-'  + c.id);
+      var val  = document.getElementById('val-'  + c.id);
+      if (prev) prev.style.background = color;
+      if (inp)  inp.value             = color;
+      if (val)  val.textContent       = color;
+    });
+  });
+}
+
+function onColorChange(id, color) {
+  state.colores[id] = color;
+  var prev = document.getElementById('prev-' + id);
+  var val  = document.getElementById('val-'  + id);
+  if (prev) prev.style.background = color;
+  if (val)  val.textContent       = color;
+  updateCSSOutput();
+  markDirty();
+}
+
+// ════════════════════════════════════════════════════════
+//  CSS OUTPUT
+// ════════════════════════════════════════════════════════
+function updateCSSOutput() {
+  var lines = [':root {'];
+  Object.keys(COLOR_GROUPS).forEach(function(grupo) {
+    COLOR_GROUPS[grupo].forEach(function(c) {
+      var color = state.colores[c.id] || c.default;
+      lines.push('  ' + c.cssVar + ': ' + color + ';');
+    });
+  });
+  lines.push('}', '');
+  // Selectores directos
+  Object.keys(COLOR_GROUPS).forEach(function(grupo) {
+    COLOR_GROUPS[grupo].forEach(function(c) {
+      var color = state.colores[c.id] || c.default;
+      if (color !== c.default) {
+        lines.push('/* ' + c.label + ' */');
+        lines.push(c.selector + ' { color: ' + color + ' !important; }');
+      }
+    });
+  });
+  document.getElementById('css-output').value = lines.join('\n');
+}
+
+function copiarCSS() {
+  var t = document.getElementById('css-output');
+  t.select();
+  document.execCommand('copy');
+  toast('CSS copiado ✓', 'success');
+}
+
+// ════════════════════════════════════════════════════════
+//  GUARDAR
+// ════════════════════════════════════════════════════════
+function markDirty() {
+  state.dirty = true;
+  document.getElementById('save-bar').classList.add('visible');
+}
+
+function descartarCambios() {
+  state.dirty = false;
+  document.getElementById('save-bar').classList.remove('visible');
+  // Recargar estado desde configRemoto
+  SECCIONES.forEach(function(s) {
+    var val = configRemoto[s.campo];
+    state.secciones[s.campo] = (val === undefined || val === '' || val === 'true');
+  });
+  Object.keys(COLOR_GROUPS).forEach(function(grupo) {
+    COLOR_GROUPS[grupo].forEach(function(c) {
+      state.colores[c.id] = configRemoto[c.id] || c.default;
+    });
+  });
+  renderSecciones();
+  renderColores();
+  updateCSSOutput();
+  toast('Cambios descartados');
+}
+
+function guardarCambios() {
+  var btn = document.getElementById('btn-guardar');
+  btn.innerHTML = '<span class="spin"></span>Guardando…';
+  btn.disabled = true;
+
+  // Construir objeto data con todos los campos
+  var data = {};
+  SECCIONES.forEach(function(s) {
+    data[s.campo] = state.secciones[s.campo] ? 'true' : 'false';
+  });
+  Object.keys(COLOR_GROUPS).forEach(function(grupo) {
+    COLOR_GROUPS[grupo].forEach(function(c) {
+      data[c.id] = state.colores[c.id] || c.default;
+    });
+  });
+
+  fetch(PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'save', tab: 'Config', data: data })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(j) {
+    if (!j.ok) throw new Error(j.error || 'Error al guardar');
+    // Actualizar configRemoto
+    Object.assign(configRemoto, data);
+    state.dirty = false;
+    document.getElementById('save-bar').classList.remove('visible');
+    toast('Guardado correctamente ✓', 'success');
+  })
+  .catch(function(e) {
+    toast('Error: ' + e.message, 'error');
+  })
+  .finally(function() {
+    btn.innerHTML = '?? Guardar todo';
+    btn.disabled = false;
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════════════
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(function() { el.classList.remove('show'); }, 3000);
+}
+</script>
+
+</body>
+</html>
